@@ -1,0 +1,208 @@
+<!-- <?php
+session_start();
+
+if (!isset($_SESSION["username"])) {
+    header("location: /myshop/login.php");
+    exit();
+}
+?> -->
+
+
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "knp_project";
+
+//create connection
+$connection = new mysqli($servername, $username, $password, $database);
+
+$item_name = "";
+$date_of_delivery = "";
+$supplier_name = "";
+$supplier_number = "";
+$quantity_ordered = "";
+$price = "";
+$payer_name = "";
+$payer_number = "";
+$total = "";
+
+$errorMessage = "";
+$successMessage = "";
+
+if ( $_SERVER['REQUEST_METHOD'] == 'POST' ){
+    $item_name = $_POST["item_name"];
+    $date_of_delivery = $_POST ["date_of_delivery"];
+    $supplier_name = $_POST ["supplier_name"];
+    $supplier_number = $_POST ["supplier_number"];
+    $quantity_ordered = $_POST ["quantity_ordered"];
+    $price = $_POST ["price"];
+    $payer_name = $_POST ["payer_name"];
+    $payer_number = $_POST ["payer_number"];
+    $total = $_POST ["total"];
+
+    do {
+        if ( empty($item_name) || empty($date_of_delivery) || empty($supplier_name) ||
+             empty($supplier_number)|| empty($quantity_ordered) || empty($price) 
+             || empty($payer_name) || empty($payer_number)  || empty($total) ) {
+            $errorMessage = "all the fields are required";
+            break;
+        }
+        
+
+        $sql = "INSERT INTO payment (item_name, date_of_delivery, supplier_name, supplier_number, quantity_ordered, price, payer_name, payer_number, total) ".
+                    "VALUES ('$item_name', '$date_of_delivery', '$supplier_name', '$supplier_number', '$quantity_ordered', '$price', '$payer_name', '$payer_number', '$total')";
+        $result = $connection->query($sql);
+
+        if (!$result) {
+            $errorMessage = "invalid query: " . $connection->error;
+            break;
+        }
+
+
+        $item_name = "";
+        $date_of_delivery = "";
+        $supplier_name = "";
+        $supplier_number = "";
+        $quantity_ordered = "";
+        $price = "";
+        $payer_name = "";
+        $payer_number = "";
+        $total = "";
+
+        $successMessage = "Payment successfully";
+
+        // header("location: /myshop/payment.php");
+        // exit;
+
+     } while (false);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</head>
+<style>
+    form{
+        border-radius: 15px;
+        border: 3px solid green;
+        width: 39%;
+        margin: 10px;
+        padding: 20px;
+        display: inline-block;
+        vertical-align: top;
+        transition: transform 0.5s, background-color 0.5s, color 0.5s;
+        box-shadow: 1px 5px 20px 9px green;
+    }
+    /* form :hover{
+        transform: scale(1.05);
+            background-color: black;
+            color: #fff;
+            box-shadow: 5px 5px 6px 2px blue;
+    } */
+    #button{
+        width: 30%;
+        padding: 4px;
+        font-size: 23px;
+        background-color: green;
+    }
+</style>
+<body>
+<?php
+    if ( !empty($errorMessage) ) {
+        echo "
+        <div class='alert alert-warning alert-dismissible fade show' role='alert'>
+            <strong>$errorMessage</strong>
+            <button type='button' class ='btn-close' data-bs-dismiss='alert' aria-label='close'></button>
+        </div>
+        ";
+    }
+    ?>
+            <!-- displaying success message -->
+            <?php
+        if ( !empty($successMessage) ) {
+            echo "
+            <div class='row mb-3>
+                <div class='offset-sm-3 col-sm-6'>
+                    <div class='alert alert-success alert-dismissible fade show role='alert'>
+                        <strong>$successMessage</strong>
+                        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='close'>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            ";
+        }
+        ?>
+    <br><br>
+<center>
+<form action="" method="post">
+    <h2><u>PAYMENT DETAILS:</u></h2>
+    <br>
+        <label class="col-sm-3 col-form-label">Item Name</label>
+            <input type="text" id="item_name" name="item_name">
+            <br><br>
+
+        <label class="col-sm-3 col-form-label">Date Of Delivery</label>
+            <input type="date" id="date_of_delivery" name="date_of_delivery">
+            <br><br>
+
+        <label class="col-sm-3 col-form-label">Supplier Name</label>
+            <input type="text" id="supplier_name" name="supplier_name">
+            <br><br>
+
+
+        <label class="col-sm-3 col-form-label">Supplier Number</label>
+            <input type="number" id="supplier_number" name="supplier_number">
+            <br><br>
+
+
+        <label class="col-sm-3 col-form-label">Quantity Ordered</label>
+            <input type="number" id="quantity" name="quantity_ordered" oninput="calculateTotal()">
+            <br><br>
+
+        <label class="col-sm-3 col-form-label">price per item</label>
+            <input type="number" id="price" value="14" name="price" oninput="calculateTotal()">
+            <br><br>
+
+
+    <h4><u>DETAILS OF ONE PAYING FOR THE ITEMS:</u></h4>
+        <label class="col-sm-3 col-form-label">Name Of One To Pay</label>
+            <input type="text" id="payer_name" name="payer_name">
+            <br><br>
+
+        <label class="col-sm-3 col-form-label">Number Of One To Pay</label>
+            <input type="number" id="payer_number" name="payer_number">
+            <br><br>
+
+
+        <label class="col-sm-3 col-form-label">total cost</label>
+            <input type="number" id="total" name="total" readonly  oninput="calculateTotal()">
+            <br><br>
+
+            <input type="submit" id="button" name="button" class="btn btn-success">
+</form>
+</body>
+</center>
+
+
+
+
+    <script>
+        function calculateTotal() {
+            var quantity = parseFloat(document.getElementById("quantity").value) || 0;
+            var price = parseFloat(document.getElementById("price").value) || 0;
+
+            var total = quantity * price;
+
+            document.getElementById("total").value = total.toFixed(3);
+        }
+    </script>
+</body>
+</html>
